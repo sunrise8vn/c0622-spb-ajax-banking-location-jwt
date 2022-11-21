@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Index</title>
+    <th:block th:replace="layout/head :: head" />
+</head>
+<body>
+<div class="container-fluid">
+    <header>
+        <div class="row">
+            <div class="col-sm-5">
+                <h1>List of customers</h1>
+            </div>
+            <div class="col-sm-7">
+                <button id="btnShowCreateModal" class="btn btn-outline-light">
+                    <i class="fa fa-plus-square-o" aria-hidden="true"></i>
+                    <span>Add New Customer ssss</span>
+                </button>
+                <a href="/transfers" class="btn btn-outline-light"><i class="fa fa-history" aria-hidden="true"></i> <span>Transfer money Information</span></a>
+            </div>
+        </div>
+    </header>
+
+    <div class="content">
+
+        <table class="table table-hover" id="tbCustomer">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Balance</th>
+                <th>Province Name</th>
+                <th>District Name</th>
+                <th>Ward Name</th>
+                <th>Address</th>
+                <th colspan="4">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+
+    <footer id="footer">
+
+    </footer>
+</div>
+
+
+<!-- Modal Create Customer -->
+<th:block th:replace="customer/modalCreateCustomer :: modalCreateCustomer" />
+
+<!-- Modal Update Customer -->
+<th:block th:replace="customer/modalUpdateCustomer :: modalUpdateCustomer" />
+
+<!-- Modal Deposit -->
+<th:block th:replace="customer/modalDeposit :: modalDeposit" />
+
+
+<th:block th:replace="layout/script :: script" />
+
+<script src="/assets/js/app.js"></script>
+
+<script>
+
+    const page = {
+        urls: {
+            getAllCustomers: App.CUSTOMER_API + "?deleted=0",
+            getCustomerById: App.CUSTOMER_API,
+            createCustomer: App.CUSTOMER_API,
+            createCustomerWithAvatar: App.CUSTOMER_API + "/create-with-avatar",
+            updateCustomer: App.CUSTOMER_API,
+            doDeposit: App.DEPOSIT_API,
+        },
+        elements: {},
+        loadData: {},
+        commands: {},
+        dialogs: {
+            elements: {},
+            loadData: {},
+            commands: {},
+            alertDanger: {}
+        },
+        initializeEventControl: {}
+    }
+
+    page.elements.btnShowCreateModal = $("#btnShowCreateModal");
+    page.elements.tbCustomer = $("#tbCustomer");
+    page.elements.tbCustomerBody = $("#tbCustomer tbody");
+
+    page.dialogs.elements.modalCreateCustomer = $("#modalCreateCustomer");
+    page.dialogs.elements.frmCreateCustomer = $("#frmCreateCustomer");
+    page.dialogs.elements.customerIdCre = $("#customerIdCre");
+    page.dialogs.elements.fullNameCre = $("#fullNameCre");
+    page.dialogs.elements.emailCre = $("#emailCre");
+    page.dialogs.elements.phoneCre = $("#phoneCre");
+    page.dialogs.elements.addressCre = $("#addressCre");
+    page.dialogs.elements.btnCreate = $("#btnCreate");
+
+    page.dialogs.elements.modalUpdateCustomer = $("#modalUpdateCustomer");
+    page.dialogs.elements.frmUpdateCustomer = $("#frmUpdateCustomer");
+    page.dialogs.elements.customerIdUp = $("#customerIdUp");
+    page.dialogs.elements.fullNameUp = $("#fullNameUp");
+    page.dialogs.elements.emailUp = $("#emailUp");
+    page.dialogs.elements.phoneUp = $("#phoneUp");
+    page.dialogs.elements.addressUp = $("#addressUp");
+    page.dialogs.elements.btnUpdate = $("#btnUpdate");
+
+    page.dialogs.elements.modalDeposit = $("#modalDeposit");
+    page.dialogs.elements.frmDeposit = $("#frmDeposit");
+    page.dialogs.elements.customerIdDep = $("#customerIdDep");
+    page.dialogs.elements.fullNameDep = $("#fullNameDep");
+    page.dialogs.elements.balanceDep = $("#balanceDep");
+    page.dialogs.elements.transactionAmountDep = $("#transactionAmountDep");
+    page.dialogs.elements.btnDeposit = $("#btnDeposit");
+
+    page.dialogs.alertDanger.modalCreate = $("#modalCreateCustomer .modal-body .modal-alert-danger");
+    page.dialogs.alertDanger.modalUpdate = $("#modalUpdateCustomer .modal-body .modal-alert-danger");
+    page.dialogs.alertDanger.modalDeposit = $("#modalDeposit .modal-body .modal-alert-danger");
+
+    page.dialogs.elements.wrapper = $("#frmCreateCustomer section .wrapper");
+    page.dialogs.elements.productName = $("#productName");
+    page.dialogs.elements.description = $("#description");
+    page.dialogs.elements.imageFile = $("#imageFile");
+    page.dialogs.elements.wrapperContent = $("#frmCreateCustomer section .wrapper .content");
+    page.dialogs.elements.imagePreview = $("#frmCreateCustomer section .image-preview canvas");
+    page.dialogs.elements.canvas = $("#canvas");
+    page.dialogs.elements.context = page.dialogs.elements.canvas[0].getContext('2d');
+    page.dialogs.elements.imagePreview.css("display", "none");
+    page.dialogs.elements.divImagePreview = $("div.image-preview, div.file-name");
+    page.dialogs.elements.btnClearImagePreview = $(".clear-image-preview i");
+
+    let locationRegion = new LocationRegion();
+    let customer = new Customer();
+    let deposit = new Deposit();
+
+
+    page.commands.getAllCustomers = () => {
+        $.ajax({
+            headers: {
+                "accept": "application/json",
+                "content-type": "application/json"
+            },
+            type: "GET",
+            url: page.urls.getAllCustomers
+        })
+            .done((data) => {
+
+                $.each(data, (i, item) => {
+                    customer = item;
+                    locationRegion = customer.locationRegion;
+                    let str = renderCustomer(customer, locationRegion);
+
+                    page.elements.tbCustomerBody.prepend(str);
+                })
+
+                page.commands.handleShowUpdateModal();
+
+                page.commands.handleShowDepositModal();
+            })
+            .fail((error) => {
+                console.error(error);
+            })
+    }
+
+
+    page.commands.getCustomerById = (customerId) => {
+        return $.ajax({
+            type: "GET",
+            url: page.urls.getCustomerById + "/" + customerId
+        })
+            .done((data) => {
+                customer = data;
+            })
+            .fail((error) => {
+                console.error(error);
+            })
+    }
+
+
+    function renderCustomer(customer, locationRegion) {
+        return `
+                <tr id="tr_${customer.id}">
+                    <td>${customer.id}</td>
+                    <td>${customer.fullName}</td>
+                    <td>${customer.email}</td>
+                    <td>${customer.phone}</td>
+                    <td>${customer.balance}</td>
+                    <td>${locationRegion.provinceName}</td>
+                    <td>${locationRegion.districtName}</td>
+                    <td>${locationRegion.wardName}</td>
+                    <td>${locationRegion.address}</td>
+                    <td>
+                        <button class="btn btn-outline-secondary update" data-id="${customer.id}">
+                            <i class="fa fa-plus" aria-hidden="true"></i>
+                            Update
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-outline-success deposit" data-id="${customer.id}">
+                            <i class="fa fa-plus" aria-hidden="true"></i>
+                            Deposit
+                        </button>
+                    </td>
+                    <td>
+                        <a href="/customers/transfer/1">
+                            <button class="btn btn-outline-primary">
+                                <i class="fa fa-exchange" aria-hidden="true"></i>
+                                Transfer
+                            </button>
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/customers/delete/1">
+                            <button class="btn btn-outline-danger">
+                                <i class="fa fa-trash" aria-hidden="true"></i>
+                                Delete
+                            </button>
+                        </a>
+                    </td>
+                </tr>
+            `;
+    }
+
+
+    page.commands.createCustomer = () => {
+
+        locationRegion.provinceId = '234';
+        locationRegion.provinceName = 'TT Huế';
+        locationRegion.districtId = '345';
+        locationRegion.districtName = 'TP Huế';
+        locationRegion.wardId = '456';
+        locationRegion.wardName = 'P. Phú Nhuận';
+        locationRegion.address = '...';
+
+        customer.fullName = page.dialogs.elements.fullNameCre.val();
+        customer.email = page.dialogs.elements.emailCre.val();
+        customer.phone = page.dialogs.elements.phoneCre.val();
+        // customer.address = page.dialogs.elements.addressCre.val();
+        customer.locationRegion = locationRegion;
+        customer.balance = 0;
+        customer.deleted = 0;
+
+        let formData = new FormData();
+        formData.append("fullName", customer.fullName);
+        formData.append("email", customer.email);
+        formData.append("phone", customer.phone);
+        formData.append("provinceId", locationRegion.provinceId);
+        formData.append("provinceName", locationRegion.provinceName);
+        formData.append("districtId", locationRegion.districtId);
+        formData.append("districtName", locationRegion.districtName);
+        formData.append("wardId", locationRegion.wardId);
+        formData.append("wardName", locationRegion.wardName);
+        formData.append("address", locationRegion.address);
+        formData.append("file", page.dialogs.elements.imageFile[0].files[0]);
+
+        $.ajax({
+            type: "POST",
+            contentType: false,
+            cache: false,
+            processData: false,
+            url: page.urls.createCustomerWithAvatar,
+            data: formData
+        })
+            .done((data) => {
+                customer = data;
+                locationRegion = customer.locationRegion;
+                let str = renderCustomer(customer, locationRegion);
+
+                page.elements.tbCustomerBody.prepend(str);
+
+                page.dialogs.elements.modalCreateCustomer.modal("hide");
+
+                removeEventShowUpdateModal();
+
+                page.commands.handleShowUpdateModal();
+            })
+            .fail((error) => {
+                console.error(error);
+            })
+
+
+        // $.ajax({
+        //     headers: {
+        //         "accept": "application/json",
+        //         "content-type": "application/json"
+        //     },
+        //     type: "POST",
+        //     url: page.urls.createCustomer,
+        //     data: JSON.stringify(customer)
+        // })
+        //     .done((data) => {
+        //         customer = data;
+        //         locationRegion = customer.locationRegion;
+        //         let str = renderCustomer(customer, locationRegion);
+        //
+        //         page.elements.tbCustomerBody.prepend(str);
+        //
+        //         page.dialogs.elements.modalCreateCustomer.modal("hide");
+        //
+        //         removeEventShowUpdateModal();
+        //
+        //         page.commands.handleShowUpdateModal();
+        //     })
+        //     .fail((error) => {
+        //         console.error(error);
+        //     })
+    }
+
+
+    page.commands.updateCustomer = (obj) => {
+        $.ajax({
+            headers: {
+                "accept": "application/json",
+                "content-type": "application/json"
+            },
+            type: "PATCH",
+            url: page.urls.updateCustomer + "/" + obj.id,
+            data: JSON.stringify(obj)
+        })
+            .done((data) => {
+
+                let str = renderCustomer(data);
+
+                $("#tr_" + obj.id).replaceWith(str);
+
+                page.dialogs.elements.modalUpdateCustomer.modal("hide");
+
+                removeEventShowUpdateModal();
+
+                page.commands.handleShowUpdateModal();
+            })
+            .fail((error) => {
+                console.error(error);
+            })
+    }
+
+    page.commands.deposit = () => {
+        deposit.transactionAmount = page.dialogs.elements.transactionAmountDep.val();
+        deposit.customerId = page.dialogs.elements.customerIdDep.val();
+
+        $.ajax({
+            headers: {
+                "accept": "application/json",
+                "content-type": "application/json"
+            },
+            type: "POST",
+            url: page.urls.doDeposit,
+            data: JSON.stringify(deposit)
+        })
+            .done((data) => {
+                // let str = renderCustomer(data);
+
+                // page.elements.tbCustomerBody.prepend(str);
+
+                page.dialogs.elements.modalDeposit.modal("hide");
+
+                // removeEventShowUpdateModal();
+
+                // page.commands.handleShowUpdateModal();
+            })
+            .fail((jqXHR) => {
+                let errors = jqXHR.responseJSON;
+
+                if (errors) {
+                    let str = "";
+                    $.each(errors, (k, v) => {
+                        str += `
+                            <li><label for="${k + 'Dep'}">${v}</label></li>
+                        `;
+                    })
+
+                    page.dialogs.alertDanger.modalDeposit.append(str);
+                }
+            })
+    }
+
+
+    page.dialogs.elements.btnCreate.on("click", () => {
+        page.dialogs.elements.frmCreateCustomer.trigger("submit");
+    })
+
+    page.dialogs.elements.btnUpdate.on("click", () => {
+        customer.id = page.dialogs.elements.customerIdUp.val();
+        customer.fullName = page.dialogs.elements.fullNameUp.val();
+        customer.email = page.dialogs.elements.emailUp.val();
+        customer.phone = page.dialogs.elements.phoneUp.val();
+        customer.address = page.dialogs.elements.addressUp.val();
+
+        page.commands.updateCustomer(customer);
+    })
+
+    page.dialogs.elements.btnDeposit.on("click", () => {
+        page.commands.deposit();
+    })
+
+
+    page.commands.handleShowCreateModal = () => {
+        page.elements.btnShowCreateModal.on("click", () => {
+            page.dialogs.elements.modalCreateCustomer.modal("show");
+        })
+    }
+
+    page.commands.handleShowUpdateModal = () => {
+        $(".update").on("click", function () {
+            let id = $(this).data("id");
+
+            page.commands.getCustomerById(id).then((data) => {
+                page.dialogs.elements.customerIdUp.val(id);
+                page.dialogs.elements.fullNameUp.val(data.fullName);
+                page.dialogs.elements.emailUp.val(data.email);
+                page.dialogs.elements.phoneUp.val(data.phone);
+                page.dialogs.elements.addressUp.val(data.address);
+
+                page.dialogs.elements.modalUpdateCustomer.modal("show");
+            })
+                .catch(() => {
+                    alert("ID not valid");
+                });
+        })
+    }
+
+
+    page.commands.handleShowDepositModal = () => {
+        $(".deposit").on("click", function () {
+            let customerId = $(this).data("id");
+
+            page.commands.getCustomerById(customerId).then(() => {
+                page.dialogs.elements.customerIdDep.val(customer.id);
+                page.dialogs.elements.fullNameDep.val(customer.fullName);
+                page.dialogs.elements.balanceDep.val(customer.balance);
+                page.dialogs.elements.modalDeposit.modal("show");
+            })
+            .catch(() => {
+                alert("Customer ID not valid");
+            })
+        })
+    }
+
+    page.dialogs.commands.handleCloseCreateModal = () => {
+        // page.elements.currentRow.val("");
+        page.dialogs.alertDanger.modalCreate.empty().removeClass("show").addClass("hide");
+        page.dialogs.elements.frmCreateCustomer.find("input.error").removeClass("error");
+        page.dialogs.elements.frmCreateCustomer[0].reset();
+        page.dialogs.elements.frmCreateCustomer.validate().resetForm();
+    }
+
+    function removeEventShowUpdateModal() {
+        $(".update").off();
+    }
+
+    page.dialogs.elements.frmCreateCustomer.validate({
+        rules: {
+            fullNameCre: {
+                required: true,
+                minlength: 3,
+                maxlength: 25
+            },
+            emailCre: {
+                required: true
+            }
+        },
+        messages: {
+            fullNameCre: {
+                required: "Họ tên là bắt buộc",
+                minlength: "Họ tên có độ dài tối thiếu là 3 ký tự",
+                maxlength: "Họ tên có độ dài tối đa là 25 ký tự"
+            },
+            emailCre: {
+                required: "Email là bắt buộc"
+            }
+        },
+        errorLabelContainer: "#modalCreateCustomer .modal-alert-danger",
+        errorPlacement: function (error, element) {
+            error.appendTo("#modalCreateCustomer .modal-alert-danger");
+        },
+        showErrors: function(errorMap, errorList) {
+            if (this.numberOfInvalids() > 0) {
+                $("#modalCreateCustomer .modal-alert-danger").removeClass("hide").addClass("show");
+            } else {
+                $("#modalCreateCustomer .modal-alert-danger").removeClass("show").addClass("hide").empty();
+                $("#frmCreateCustomer input.error").removeClass("error");
+            }
+            this.defaultShowErrors();
+        },
+        submitHandler: function () {
+            page.commands.createCustomer();
+        }
+    })
+
+
+    page.dialogs.commands.loadImageToCanvas = (imageFile) => {
+        page.dialogs.elements.imagePreview.css("display", "");
+        page.dialogs.elements.wrapper.addClass("active");
+        page.dialogs.elements.wrapperContent.css("opacity", 0);
+
+        let imageObj = new Image();
+
+        imageObj.onload = function () {
+            page.dialogs.elements.context.canvas.width = imageObj.width;
+            page.dialogs.elements.context.canvas.height = imageObj.height;
+            page.dialogs.elements.context.drawImage(imageObj, 0, 0, imageObj.width, imageObj.height);
+        };
+
+        imageObj.src = URL.createObjectURL(imageFile)
+    }
+
+    page.dialogs.commands.changeImagePreview = () => {
+        let imageFile = page.dialogs.elements.imageFile[0].files[0];
+
+        if (imageFile) {
+            let reader = new FileReader();
+
+            reader.readAsDataURL(imageFile);
+
+            reader.onload = function(e){
+                if (e.target.readyState === FileReader.DONE) {
+                    page.dialogs.commands.loadImageToCanvas(imageFile);
+                }
+            }
+        } else {
+            page.dialogs.elements.clearImagePreview();
+        }
+    }
+
+
+    page.commands.loadData = () => {
+        page.commands.getAllCustomers();
+    }
+
+    page.initializeEventControl = () => {
+        page.commands.handleShowCreateModal();
+
+        page.dialogs.elements.modalCreateCustomer.on("hidden.bs.modal", function () {
+            page.dialogs.commands.handleCloseCreateModal();
+        });
+
+
+        page.dialogs.elements.divImagePreview.on("click", function () {
+            page.dialogs.elements.imageFile.trigger("click");
+        });
+
+        page.dialogs.elements.imageFile.on("change", function () {
+            page.dialogs.commands.changeImagePreview();
+        });
+    }
+
+
+    $(() => {
+        page.commands.loadData();
+
+        page.initializeEventControl();
+    });
+
+</script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 package com.cg.model;
 
 
+import com.cg.model.dto.CustomerAvatarDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -43,4 +44,14 @@ public class CustomerAvatar {
 
     @Column(columnDefinition = "BIGINT(20) DEFAULT 0")
     private Long ts = new Date().getTime();
+
+    public CustomerAvatarDTO toCustomerAvatarDTO() {
+        return new CustomerAvatarDTO()
+                .setId(id)
+                .setFileName(fileName)
+                .setFileFolder(fileFolder)
+                .setFileUrl(fileUrl)
+                .setFileType(fileType)
+                .setCloudId(cloudId);
+    }
 }

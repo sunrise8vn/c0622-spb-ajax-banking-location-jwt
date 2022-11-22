@@ -67,7 +67,9 @@ public class Customer extends BaseEntity implements Validator {
             .setEmail(email)
             .setPhone(phone)
             .setBalance(balance)
-            .setLocationRegion(locationRegion.toLocationRegionDTO());
+            .setLocationRegion(locationRegion.toLocationRegionDTO())
+            .setAvatar(customerAvatar.toCustomerAvatarDTO())
+            ;
     }
 
 

@@ -2,6 +2,9 @@ class App {
     static DOMAIN_SERVER = "http://localhost:8095";
     static CUSTOMER_API = this.DOMAIN_SERVER + "/api/customers";
     static DEPOSIT_API = this.DOMAIN_SERVER + "/api/deposits";
+    static SERVER_CLOUDINARY = "https://res.cloudinary.com/toanphat/image/upload";
+    static SCALE_W250_H250_Q100 = "/c_limit,w_250,h_250,q_100";
+    static SCALE_W80_H80_Q100 = "/c_limit,w_80,h_80,q_100";
 }
 
 class LocationRegion {

@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
 
-#modalCreateCustomer .wrapper{
+#modalCreateCustomer .wrapper, #modalUpdateCustomer .wrapper {
     position: relative;
     height: 250px;
     width: 90%;

@@ -23,7 +23,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
                 "c.email, " +
                 "c.phone, " +
                 "c.balance, " +
-                "c.locationRegion" +
+                "c.locationRegion, " +
+                "c.customerAvatar " +
             ") FROM Customer AS c")
     List<CustomerDTO> getAllCustomerDTO();
 

@@ -27,6 +27,7 @@
             <thead>
             <tr>
                 <th>ID</th>
+                <th>Avatar</th>
                 <th>Full Name</th>
                 <th>Email</th>
                 <th>Phone</th>
@@ -122,16 +123,24 @@
     page.dialogs.alertDanger.modalDeposit = $("#modalDeposit .modal-body .modal-alert-danger");
 
     page.dialogs.elements.wrapper = $("#frmCreateCustomer section .wrapper");
-    page.dialogs.elements.productName = $("#productName");
-    page.dialogs.elements.description = $("#description");
     page.dialogs.elements.imageFile = $("#imageFile");
     page.dialogs.elements.wrapperContent = $("#frmCreateCustomer section .wrapper .content");
     page.dialogs.elements.imagePreview = $("#frmCreateCustomer section .image-preview canvas");
     page.dialogs.elements.canvas = $("#canvas");
     page.dialogs.elements.context = page.dialogs.elements.canvas[0].getContext('2d');
     page.dialogs.elements.imagePreview.css("display", "none");
-    page.dialogs.elements.divImagePreview = $("div.image-preview, div.file-name");
-    page.dialogs.elements.btnClearImagePreview = $(".clear-image-preview i");
+    page.dialogs.elements.divImagePreview = $("#frmCreateCustomer div.image-preview, div.file-name");
+    page.dialogs.elements.btnClearImagePreview = $("#frmCreateCustomer .clear-image-preview i");
+
+    page.dialogs.elements.wrapperUp = $("#frmUpdateCustomer section .wrapper");
+    page.dialogs.elements.imageFileUp = $("#imageFileUp");
+    page.dialogs.elements.wrapperContentUp = $("#frmUpdateCustomer section .wrapper .content");
+    page.dialogs.elements.imagePreviewUp = $("#frmUpdateCustomer section .image-preview canvas");
+    page.dialogs.elements.canvasUp = $("#canvasUp");
+    page.dialogs.elements.contextUp = page.dialogs.elements.canvasUp[0].getContext('2d');
+    page.dialogs.elements.imagePreviewUp.css("display", "none");
+    page.dialogs.elements.divImagePreviewUp = $("#frmUpdateCustomer div.image-preview, div.file-name");
+    page.dialogs.elements.btnClearImagePreviewUp = $("#frmUpdateCustomer .clear-image-preview i");
 
     let locationRegion = new LocationRegion();
     let customer = new Customer();
@@ -152,7 +161,8 @@
                 $.each(data, (i, item) => {
                     customer = item;
                     locationRegion = customer.locationRegion;
-                    let str = renderCustomer(customer, locationRegion);
+                    let avatar = customer.avatar;
+                    let str = renderCustomer(customer, locationRegion, avatar);
 
                     page.elements.tbCustomerBody.prepend(str);
                 })
@@ -181,10 +191,13 @@
     }
 
 
-    function renderCustomer(customer, locationRegion) {
+    function renderCustomer(customer, locationRegion, avatar) {
         return `
                 <tr id="tr_${customer.id}">
                     <td>${customer.id}</td>
+                    <td>
+                        <img src="${App.SERVER_CLOUDINARY + App.SCALE_W80_H80_Q100 + "/" + avatar.fileFolder + "/" + avatar.fileName}" alt="" />
+                    </td>
                     <td>${customer.fullName}</td>
                     <td>${customer.email}</td>
                     <td>${customer.phone}</td>
@@ -194,7 +207,7 @@
                     <td>${locationRegion.wardName}</td>
                     <td>${locationRegion.address}</td>
                     <td>
-                        <button class="btn btn-outline-secondary update" data-id="${customer.id}">
+                        <button class="btn btn-outline-secondary update" data-id="${customer.id}" data-avatar-folder="${avatar.fileFolder}" data-avatar-file-name="${avatar.fileName}">
                             <i class="fa fa-plus" aria-hidden="true"></i>
                             Update
                         </button>
@@ -268,7 +281,8 @@
             .done((data) => {
                 customer = data;
                 locationRegion = customer.locationRegion;
-                let str = renderCustomer(customer, locationRegion);
+                let avatar = customer.avatar;
+                let str = renderCustomer(customer, locationRegion, avatar);
 
                 page.elements.tbCustomerBody.prepend(str);
 
@@ -407,6 +421,10 @@
     page.commands.handleShowUpdateModal = () => {
         $(".update").on("click", function () {
             let id = $(this).data("id");
+            let avatarFileName = $(this).data("avatar-file-name");
+            let avatarFolder = $(this).data("avatar-folder");
+
+            let avatarUrl = App.SERVER_CLOUDINARY + App.SCALE_W250_H250_Q100 + "/" + avatarFolder + "/" + avatarFileName;
 
             page.commands.getCustomerById(id).then((data) => {
                 page.dialogs.elements.customerIdUp.val(id);
@@ -414,6 +432,8 @@
                 page.dialogs.elements.emailUp.val(data.email);
                 page.dialogs.elements.phoneUp.val(data.phone);
                 page.dialogs.elements.addressUp.val(data.address);
+
+                page.dialogs.commands.loadImageToCanvasUp(avatarUrl);
 
                 page.dialogs.elements.modalUpdateCustomer.modal("show");
             })
@@ -446,6 +466,8 @@
         page.dialogs.elements.frmCreateCustomer.find("input.error").removeClass("error");
         page.dialogs.elements.frmCreateCustomer[0].reset();
         page.dialogs.elements.frmCreateCustomer.validate().resetForm();
+
+        page.dialogs.elements.clearImagePreview();
     }
 
     function removeEventShowUpdateModal() {
@@ -505,8 +527,40 @@
             page.dialogs.elements.context.drawImage(imageObj, 0, 0, imageObj.width, imageObj.height);
         };
 
-        imageObj.src = URL.createObjectURL(imageFile)
+        imageObj.src = URL.createObjectURL(imageFile);
     }
+
+    page.dialogs.commands.loadImageToCanvasUp = (imageFile, event = "load") => {
+        page.dialogs.elements.imagePreviewUp.css("display", "");
+        page.dialogs.elements.wrapperUp.addClass("active");
+        page.dialogs.elements.wrapperContentUp.css("opacity", 0);
+
+        let imageObj = new Image();
+
+        imageObj.onload = function () {
+            page.dialogs.elements.contextUp.canvas.width = imageObj.width;
+            page.dialogs.elements.contextUp.canvas.height = imageObj.height;
+            page.dialogs.elements.contextUp.drawImage(imageObj, 0, 0, imageObj.width, imageObj.height);
+        };
+
+        return (event === "load") ? (imageObj.src = imageFile) : (imageObj.src = URL.createObjectURL(imageFile));
+    }
+
+    // page.dialogs.commands.loadImageToCanvas = (imageFile, fileType, imageUrl) => {
+    //     page.dialogs.elements.imagePreview.css("display", "");
+    //     page.dialogs.elements.wrapper.addClass("active");
+    //     page.dialogs.elements.wrapperContent.css("opacity", 0);
+    //
+    //     let imageObj = new Image();
+    //
+    //     imageObj.onload = function () {
+    //         page.dialogs.elements.context.canvas.width = imageObj.width;
+    //         page.dialogs.elements.context.canvas.height = imageObj.height;
+    //         page.dialogs.elements.context.drawImage(imageObj, 0, 0, imageObj.width, imageObj.height);
+    //     };
+    //
+    //     fileType === "BINARY" ? (imageObj.src = URL.createObjectURL(imageFile)) : (imageObj.src = imageUrl)
+    // }
 
     page.dialogs.commands.changeImagePreview = () => {
         let imageFile = page.dialogs.elements.imageFile[0].files[0];
@@ -526,6 +580,38 @@
         }
     }
 
+    page.dialogs.commands.changeImagePreviewUp = () => {
+        let imageFile = page.dialogs.elements.imageFileUp[0].files[0];
+
+        if (imageFile) {
+            let reader = new FileReader();
+
+            reader.readAsDataURL(imageFile);
+
+            reader.onload = function(e){
+                if (e.target.readyState === FileReader.DONE) {
+                    page.dialogs.commands.loadImageToCanvasUp(imageFile, "change");
+                }
+            }
+        } else {
+            page.dialogs.elements.clearImagePreviewUp();
+        }
+    }
+
+    page.dialogs.elements.clearImagePreview = () => {
+        page.dialogs.elements.imageFile.val("");
+        page.dialogs.elements.imagePreview.css("display", "none");
+        page.dialogs.elements.wrapper.removeClass("active");
+        page.dialogs.elements.wrapperContent.css("opacity", 1);
+    }
+
+    page.dialogs.elements.clearImagePreviewUp = () => {
+        page.dialogs.elements.imageFileUp.val("");
+        page.dialogs.elements.imagePreview.css("display", "none");
+        page.dialogs.elements.wrapperUp.removeClass("active");
+        page.dialogs.elements.wrapperContentUp.css("opacity", 1);
+    }
+
 
     page.commands.loadData = () => {
         page.commands.getAllCustomers();
@@ -543,8 +629,24 @@
             page.dialogs.elements.imageFile.trigger("click");
         });
 
+        page.dialogs.elements.divImagePreviewUp.on("click", function () {
+            page.dialogs.elements.imageFileUp.trigger("click");
+        });
+
         page.dialogs.elements.imageFile.on("change", function () {
             page.dialogs.commands.changeImagePreview();
+        });
+
+        page.dialogs.elements.imageFileUp.on("change", function () {
+            page.dialogs.commands.changeImagePreviewUp();
+        });
+
+        page.dialogs.elements.btnClearImagePreview.on("click", function () {
+            page.dialogs.elements.clearImagePreview();
+        });
+
+        page.dialogs.elements.btnClearImagePreviewUp.on("click", function () {
+            page.dialogs.elements.clearImagePreviewUp();
         });
     }
 

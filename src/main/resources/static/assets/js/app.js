@@ -1,5 +1,5 @@
 class App {
-    static DOMAIN_SERVER = "http://localhost:8095";
+    static DOMAIN_SERVER = "http://localhost:8098";
     static CUSTOMER_API = this.DOMAIN_SERVER + "/api/customers";
     static DEPOSIT_API = this.DOMAIN_SERVER + "/api/deposits";
     static SERVER_CLOUDINARY = "https://res.cloudinary.com/toanphat/image/upload";

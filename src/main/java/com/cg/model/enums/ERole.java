@@ -1,4 +1,4 @@
-package com.cg.model;
+package com.cg.model.enums;
 
 public enum ERole {
     ROLE_USER,

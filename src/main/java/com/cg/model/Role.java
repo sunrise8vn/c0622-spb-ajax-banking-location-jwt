@@ -1,7 +1,7 @@
 package com.cg.model;
 
+import com.cg.model.enums.ERole;
 import lombok.*;
-import lombok.experimental.Accessors;
 
 import javax.persistence.*;
 import java.util.List;

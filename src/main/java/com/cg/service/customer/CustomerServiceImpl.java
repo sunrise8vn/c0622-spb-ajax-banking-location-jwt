@@ -150,7 +150,7 @@ public class CustomerServiceImpl implements ICustomerService {
 
             customerAvatar.setFileName(customerAvatar.getId() + "." + fileFormat);
             customerAvatar.setFileUrl(fileUrl);
-            customerAvatar.setFileFolder(UploadUtils.IMAGE_UPLOAD_FOLDER);
+            customerAvatar.setFileFolder(UploadUtils.CUSTOMER_IMAGE_UPLOAD_FOLDER);
             customerAvatar.setCloudId(customerAvatar.getFileFolder() + "/" + customerAvatar.getId());
             customerAvatar = customerAvatarRepository.save(customerAvatar);
             return customerAvatar;

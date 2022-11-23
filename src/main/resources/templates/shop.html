@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Shopping</title>
+    <th:block th:replace="layout/head :: head" />
+</head>
+<body>
+<div class="container-fluid">
+    <header>
+        <div class="row">
+            <div class="col-sm-5">
+                <h1>Shopping</h1>
+            </div>
+            <div class="col-sm-7">
+                <button id="btnShowCreateModal" class="btn btn-outline-light">
+                    <i class="fa fa-plus-square-o" aria-hidden="true"></i>
+                    <span>Add New Customer</span>
+                </button>
+                <a href="/customers" class="btn btn-outline-light">
+                    <i class="fa fa-list" aria-hidden="true"></i>
+                    <span>List of customers</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="content">
+
+    </div>
+
+    <footer id="footer">
+
+    </footer>
+</div>
+
+
+<th:block th:replace="layout/script :: script" />
+
+<script src="/assets/js/app.js"></script>
+
+<script>
+
+    const page = {
+        urls: {
+            getAllCustomers: App.CUSTOMER_API,
+            getCustomerById: App.CUSTOMER_API,
+        },
+        elements: {},
+        loadData: {},
+        commands: {},
+        dialogs: {
+            elements: {},
+            loadData: {},
+            commands: {},
+            alertDanger: {}
+        },
+        initializeEventControl: {}
+    }
+
+    page.elements.btnShowCreateModal = $("#btnShowCreateModal");
+    page.elements.tbCustomer = $("#tbCustomer");
+    page.elements.tbCustomerBody = $("#tbCustomer tbody");
+
+    let customer = new Customer();
+
+    page.commands.getAllCustomers = () => {
+        $.ajax({
+            headers: {
+                "accept": "application/json",
+                "content-type": "application/json"
+            },
+            type: "GET",
+            url: page.urls.getAllCustomers
+        })
+            .done((data) => {
+
+                $.each(data, (i, item) => {
+                    customer = item;
+                    locationRegion = customer.locationRegion;
+                    let avatar = customer.avatar;
+                    let str = renderCustomer(customer, locationRegion, avatar);
+
+                    page.elements.tbCustomerBody.prepend(str);
+                })
+
+                page.commands.handleShowUpdateModal();
+
+                page.commands.handleShowDepositModal();
+            })
+            .fail((error) => {
+                console.error(error);
+            })
+    }
+
+
+    page.commands.getCustomerById = (customerId) => {
+        return $.ajax({
+            type: "GET",
+            url: page.urls.getCustomerById + "/" + customerId
+        })
+            .done((data) => {
+                customer = data;
+            })
+            .fail((error) => {
+                console.error(error);
+            })
+    }
+
+
+    function renderCustomer(customer, locationRegion, avatar) {
+        return `
+                <tr id="tr_${customer.id}">
+                    <td>${customer.id}</td>
+                    <td>
+                        <img src="${App.SERVER_CLOUDINARY + App.SCALE_W80_H80_Q100 + "/" + avatar.fileFolder + "/" + avatar.fileName}" alt="" />
+                    </td>
+                    <td>${customer.fullName}</td>
+                    <td>${customer.email}</td>
+                    <td>${customer.phone}</td>
+                    <td>${customer.balance}</td>
+                    <td>${locationRegion.provinceName}</td>
+                    <td>${locationRegion.districtName}</td>
+                    <td>${locationRegion.wardName}</td>
+                    <td>${locationRegion.address}</td>
+                    <td>
+                        <button class="btn btn-outline-secondary update" data-id="${customer.id}" data-avatar-folder="${avatar.fileFolder}" data-avatar-file-name="${avatar.fileName}">
+                            <i class="fa fa-plus" aria-hidden="true"></i>
+                            Update
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-outline-success deposit" data-id="${customer.id}">
+                            <i class="fa fa-plus" aria-hidden="true"></i>
+                            Deposit
+                        </button>
+                    </td>
+                    <td>
+                        <a href="/customers/transfer/1">
+                            <button class="btn btn-outline-primary">
+                                <i class="fa fa-exchange" aria-hidden="true"></i>
+                                Transfer
+                            </button>
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/customers/delete/1">
+                            <button class="btn btn-outline-danger">
+                                <i class="fa fa-trash" aria-hidden="true"></i>
+                                Delete
+                            </button>
+                        </a>
+                    </td>
+                </tr>
+            `;
+    }
+
+
+    page.commands.loadData = () => {
+        page.commands.getAllCustomers();
+    }
+
+    page.initializeEventControl = () => {
+
+    }
+
+    $(() => {
+        page.commands.loadData();
+
+        page.initializeEventControl();
+    });
+
+</script>
+</body>
+</html>

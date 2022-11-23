@@ -83,12 +83,12 @@
                     "accept": "application/json",
                     "content-type": "application/json"
                 },
-                url: "http://localhost:8095/api/auth/login",
+                url: "http://localhost:8098/api/auth/login",
                 data: JSON.stringify(obj),
                 type: "POST"
             })
             .done((data) => {
-                window.location.href = "/customers";
+                window.location.href = "/shop";
             })
             .fail((jqXHR) => {
                 alert("Login error");

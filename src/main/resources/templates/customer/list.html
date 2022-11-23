@@ -129,7 +129,7 @@
     page.dialogs.elements.canvas = $("#canvas");
     page.dialogs.elements.context = page.dialogs.elements.canvas[0].getContext('2d');
     page.dialogs.elements.imagePreview.css("display", "none");
-    page.dialogs.elements.divImagePreview = $("#frmCreateCustomer div.image-preview, div.file-name");
+    page.dialogs.elements.divImagePreview = $("#frmCreateCustomer div.image-preview, #frmCreateCustomer div.file-name");
     page.dialogs.elements.btnClearImagePreview = $("#frmCreateCustomer .clear-image-preview i");
 
     page.dialogs.elements.wrapperUp = $("#frmUpdateCustomer section .wrapper");
@@ -139,7 +139,7 @@
     page.dialogs.elements.canvasUp = $("#canvasUp");
     page.dialogs.elements.contextUp = page.dialogs.elements.canvasUp[0].getContext('2d');
     page.dialogs.elements.imagePreviewUp.css("display", "none");
-    page.dialogs.elements.divImagePreviewUp = $("#frmUpdateCustomer div.image-preview, div.file-name");
+    page.dialogs.elements.divImagePreviewUp = $("#frmUpdateCustomer div.image-preview, #frmUpdateCustomer div.file-name");
     page.dialogs.elements.btnClearImagePreviewUp = $("#frmUpdateCustomer .clear-image-preview i");
 
     let locationRegion = new LocationRegion();
@@ -607,7 +607,7 @@
 
     page.dialogs.elements.clearImagePreviewUp = () => {
         page.dialogs.elements.imageFileUp.val("");
-        page.dialogs.elements.imagePreview.css("display", "none");
+        page.dialogs.elements.imagePreviewUp.css("display", "none");
         page.dialogs.elements.wrapperUp.removeClass("active");
         page.dialogs.elements.wrapperContentUp.css("opacity", 1);
     }

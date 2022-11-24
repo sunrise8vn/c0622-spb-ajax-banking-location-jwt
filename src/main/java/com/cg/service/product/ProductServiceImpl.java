@@ -8,6 +8,7 @@ import com.cg.model.Product;
 import com.cg.model.ProductAvatar;
 import com.cg.model.dto.CustomerAvatarCreateDTO;
 import com.cg.model.dto.ProductCreateDTO;
+import com.cg.model.dto.ProductDTO;
 import com.cg.model.enums.EFileType;
 import com.cg.repository.ProductAvatarRepository;
 import com.cg.repository.ProductRepository;
@@ -52,6 +53,11 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public Optional<Product> findById(Long id) {
         return Optional.empty();
+    }
+
+    @Override
+    public List<ProductDTO> getAllProductDTO() {
+        return productRepository.getAllProductDTO();
     }
 
     @Override

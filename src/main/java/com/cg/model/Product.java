@@ -34,6 +34,8 @@ public class Product extends BaseEntity {
 
     private Long quantity;
 
+    private String unit;
+
     private String description;
 
 
@@ -42,6 +44,7 @@ public class Product extends BaseEntity {
                 .setId(id)
                 .setTitle(title)
                 .setPrice(price)
+                .setUnit(unit)
                 .setDescription(description)
                 .setAvatar(productAvatar.toProductAvatarDTO());
     }

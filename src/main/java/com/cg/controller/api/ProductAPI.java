@@ -29,14 +29,16 @@ public class ProductAPI {
     @GetMapping
     public ResponseEntity<?> getAll() {
 
-        List<Product> products = productService.findAll();
+//        List<Product> products = productService.findAll();
+//
+//        List<ProductDTO> productDTOS = new ArrayList<>();
+//
+//        for (Product item : products) {
+//            ProductDTO productDTO = item.toProductDTO();
+//            productDTOS.add(productDTO);
+//        }
 
-        List<ProductDTO> productDTOS = new ArrayList<>();
-
-        for (Product item : products) {
-            ProductDTO productDTO = item.toProductDTO();
-            productDTOS.add(productDTO);
-        }
+        List<ProductDTO> productDTOS = productService.getAllProductDTO();
 
         return new ResponseEntity<>(productDTOS, HttpStatus.OK);
     }

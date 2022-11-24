@@ -1,9 +1,11 @@
 class App {
     static DOMAIN_SERVER = "http://localhost:8098";
     static CUSTOMER_API = this.DOMAIN_SERVER + "/api/customers";
+    static PRODUCT_API = this.DOMAIN_SERVER + "/api/products";
     static DEPOSIT_API = this.DOMAIN_SERVER + "/api/deposits";
     static SERVER_CLOUDINARY = "https://res.cloudinary.com/toanphat/image/upload";
     static SCALE_W250_H250_Q100 = "/c_limit,w_250,h_250,q_100";
+    static SCALE_W288_H216_Q100 = "c_limit,w_288,h_216,q_100";
     static SCALE_W80_H80_Q100 = "/c_limit,w_80,h_80,q_100";
 }
 
@@ -38,5 +40,26 @@ class Deposit {
         this.id = id;
         this.transactionAmount = transactionAmount;
         this.customerId = customerId;
+    }
+}
+
+
+
+class ProductAvatar {
+    constructor(fileName, fileFolder, fileUrl) {
+        this.fileName = fileName;
+        this.fileFolder = fileFolder;
+        this.fileUrl = fileUrl;
+    }
+}
+
+class Product {
+    constructor(id, title, price, unit, description, avatar) {
+        this.id = id;
+        this.title = title;
+        this.price = price;
+        this.unit = unit;
+        this.description = description;
+        this.avatar = avatar;
     }
 }

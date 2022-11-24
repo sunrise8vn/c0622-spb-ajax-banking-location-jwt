@@ -24,4 +24,14 @@ public class HomeController {
         return "shop";
     }
 
+    @GetMapping("/temp")
+    public String showTempPage() {
+        return "temp";
+    }
+
+    @GetMapping("/temp2")
+    public String showTemp2Page() {
+        return "temp2";
+    }
+
 }

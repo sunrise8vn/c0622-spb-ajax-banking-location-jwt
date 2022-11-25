@@ -21,9 +21,7 @@ public class Cart extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(precision = 12, scale = 0, nullable = false)
+    @Column(name = "total_amount", precision = 12, scale = 0, nullable = false)
     private BigDecimal totalAmount;
-
-
 
 }
